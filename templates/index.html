@@ -1,0 +1,251 @@
+<html>
+<header>
+    <link crossorigin="" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+          integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+          rel="stylesheet"/>
+    <script crossorigin=""
+            integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+            src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css" rel="stylesheet">
+    <script src="//code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <style>
+            /* Styling for the search button */
+#get {
+  background-color: #4CAF50; /* Green background color */
+  border: none; /* Remove border */
+  color: white; /* White text color */
+  padding: 15px 32px; /* Large padding */
+  text-align: center; /* Center text */
+  text-decoration: none; /* Remove underline */
+  display: inline-block; /* Make it a block element */
+  font-size: 16px; /* Increase font size */
+  margin: 4px 2px; /* Add margin */
+  cursor: pointer; /* Add cursor on hover */
+  border-radius: 50px; /* Add round corners */
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3); /* Add shadow effect */
+}
+
+/* Styling for the search button on hover */
+#get:hover {
+  background-color: #3e8e41; /* Darker green */
+}
+
+/* Styling for the input field */
+#d {
+  background-color: #f2f2f2; /* Light gray background color */
+  border: none; /* Remove border */
+  color: black; /* Black text color */
+  padding: 15px 32px; /* Large padding */
+  text-align: center; /* Center text */
+  text-decoration: none; /* Remove underline */
+  display: inline-block; /* Make it a block element */
+  font-size: 16px; /* Increase font size */
+  margin: 4px 2px; /* Add margin */
+  cursor: pointer; /* Add cursor on hover */
+  border-radius: 50px; /* Add round corners */
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3); /* Add shadow effect */
+}
+
+/* Styling for the input field on focus */
+#d:focus {
+  background-color: #ddd; /* Lighter gray */
+  outline: none; /* Remove outline */
+}
+
+/* Styling for the page title */
+h2 {
+  font-size: 50px; /* Increase font size */
+  text-align: center; /* Center text */
+  margin-top: 50px; /* Add margin */
+  text-shadow: 2px 2px 5px #aaa; /* Add shadow effect */
+}
+
+/* Styling for the map container */
+#map {
+  position: relative; /* Set position to relative */
+  overflow: hidden; /* Hide overflow */
+  border-radius: 50px; /* Add round corners */
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3); /* Add shadow effect */
+}
+
+/* Styling for the leaflet popup */
+.leaflet-popup {
+  background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+  border-radius: 20px; /* Add round corners */
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3); /* Add shadow effect */
+  padding: 10px; /* Add padding */
+  font-size: 16px; /* Increase font size */
+  text-align: center; /* Center text */
+  line-height: 1.5; /* Increase line height */
+}
+
+.leaflet-popup-close-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: none;
+  background-color: transparent;
+  color: white;
+  font-size: 16px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.leaflet-popup-close-button:hover {
+  color: red;
+}
+
+
+
+    </style>
+</header>
+<body>
+<h2> Building Permits in Calgary</h2>
+<div style="height: 20px;"></div>
+<label>Issued Dates:</label>
+
+<input id="d" style="z-index: 1;">
+<button id="get" type="button">Search</button>
+<div style="height: 100px;"></div>
+
+<div id="map" style="height: 500px; z-index: 0;"></div>
+<script type="text/javascript">
+            var map = L.map('map').setView([51.03, -114], 10);
+            var layerGroup = new L.LayerGroup();
+            var layerLand = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+                 attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                 maxZoom: 18,
+                 id: 'mapbox/streets-v11',
+                 tileSize: 512,
+                 zoomOffset: -1,
+                 accessToken: 'pk.eyJ1IjoieW9uZ2lseXUxIiwiYSI6ImNrenlrems0dTAxYXgzanRmNDRsaXRzNjkifQ.vc6Qs6Inz3_uP3mJVi90Tg'
+             }).addTo(map);
+            var layerGeo = null
+            layerGroup.addTo(map);
+            layerGroup.addLayer(layerLand);
+                function onEachFeature(feature, layer) {
+                  if (feature.properties && feature.properties) {
+                      let descr = ''
+                      feature.properties.forEach((propertyy)=>{
+                        descr += `<p>Issued Date: ${propertyy.issueddate} <br>Work class group: ${propertyy.workclassgroup}<br>Contractor name:${propertyy.contractorname}<br>Community name: ${propertyy.communityname}<br>Original address: ${propertyy.originaladdress}</p>`
+
+                      });
+                      if (feature.properties > 1){
+                            console.log("Nice")
+                      }
+
+                      layer.bindPopup(descr);
+                  }
+                }
+
+
+               function getData() {
+                 const words = document.querySelector('#d').value.split('_');
+                 const dateFrom = words[0].trim()
+                 const dateTo = words[1].trim()
+                 const requestURL = `https://data.calgary.ca/resource/c2es-76ed.geojson?$where=issueddate > '${dateFrom}' and issueddate < '${dateTo}'`;
+                 const xhr = new XMLHttpRequest();
+                 xhr.open('GET', requestURL);
+                 xhr.onload = function () {
+                   if (xhr.status !== 200) {
+                     return;
+                   }
+                   const response = JSON.parse(xhr.response);
+                   const features = response['features']
+                    let geojsonFeature = []
+                    let flag = false
+
+                    features.forEach((element) => {
+                        if (element['geometry']){
+                          if (geojsonFeature.length === 0){
+                            element['properties'] = [element['properties']]
+                            geojsonFeature.push(element)
+                          }
+                          else {
+                            flag = false
+                            for (let index = 0; index < geojsonFeature.length; ++index) {
+                                if ((geojsonFeature[index]['geometry']['coordinates'][0] === element['geometry']['coordinates'][0]) && (geojsonFeature[index]['geometry']['coordinates'][1] === element['geometry']['coordinates'][1]))   {
+                                    geojsonFeature[index]['properties'].push(element['properties'])
+                                    flag = true
+                                }
+
+                            }
+                            if (flag === false){
+                                element['properties'] = [element['properties']]
+                                geojsonFeature.push(element)
+                            }
+                          }
+                      }
+
+                    });
+                   if (layerGeo){
+                        layerGroup.removeLayer(layerGeo);
+                        console.log("Removed")
+                   }
+                   layerGeo = L.geoJSON(geojsonFeature, {
+                       onEachFeature: onEachFeature
+                   }).addTo(map);
+                   layerGroup.addLayer(layerGeo);
+
+
+                 }
+                 xhr.send();
+               }
+               document.querySelector('#get').addEventListener('click', () => {
+                 getData();
+               });
+
+               (function ($) {
+
+                $.fn.daterange = function () {
+                    var opts = $.extend({
+                        "dateFormat": "yy-mm-dd",
+                        "changeMonth": false,
+                        "changeYear": false,
+                        "numberOfMonths": 2,
+                        "rangeSeparator": "_"
+                    }, arguments[0] || {}, {
+                        "onClose": function (dateText, inst) {
+                            if ($.isFunction(opts.callback)) {
+                                opts.callback.apply(this, arguments);
+                            }
+                        },
+                        "onSelect": function (dateText, inst) {
+                            var textStart;
+                            if (!inst.rangeStart) {
+                                inst.inline = true;
+                                inst.rangeStart = dateText;
+                            } else {
+                                inst.inline = false;
+                                textStart = inst.rangeStart;
+                                if (textStart !== dateText) {
+                                    $(this).val(textStart + " " + opts.rangeSeparator + " " + dateText);
+                                    inst.rangeStart = null;
+                                }
+                            }
+                        }
+                    });
+
+                    return this.each(function () {
+                        var input = $(this);
+                        if (input.is("input")) {
+                            input.datepicker(opts);
+                        }
+                    });
+                };
+
+            }(jQuery));
+
+            $("#d").daterange({
+                callback: function (range) {
+                  $(this);
+                }
+            });
+
+
+
+
+</script>
+</body>
+</html>
